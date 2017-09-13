@@ -17,6 +17,7 @@ This wrapper code was developed as part of our [CVPR 2017 paper on Unsupervised 
 ## Fork Modification - Verbose Argument
 
 Added a `verbose` argument to the `coarse2fine_flow` function that allows the user to enable/disable most console output from the function. The `verbose` argument defaults to **False**, suppressing output messages.
+
 The output affected by this flag includes all non-error related messages as well as any error messages associated with *recoverable* errors. Messages relating to *non-recoverable* errors are never suppressed.
 
 Setup and usage of the library is identical to the original wrapper.
