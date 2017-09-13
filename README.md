@@ -16,7 +16,7 @@ This wrapper code was developed as part of our [CVPR 2017 paper on Unsupervised 
 
 ## Fork Modification - Verbose Argument
 
-Added a `verbose` argument to the `coarse2fine_flow` function that allows the user to enable/disable any stdout output from the function. It defaults to **False**.
+Added a `verbose` argument to the `coarse2fine_flow` function that allows the user to enable/disable any non-error related output from the function. It defaults to **False**.
 
 Setup and usage of the library is identical to the original wrapper.
 
