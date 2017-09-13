@@ -194,7 +194,8 @@ void OpticalFlow::genInImageMask(DImage &mask, const DImage &flow,int interval)
 //
 //--------------------------------------------------------------------------------------------------------
 void OpticalFlow::SmoothFlowSOR(const DImage &Im1, const DImage &Im2, DImage &warpIm2, DImage &u, DImage &v,
-																    double alpha, int nOuterFPIterations, int nInnerFPIterations, int nSORIterations)
+																    double alpha, int nOuterFPIterations, int nInnerFPIterations, int nSORIterations,
+                                                    bool verbose)
 {
 	DImage mask,imdx,imdy,imdt;
 	int imWidth,imHeight,nChannels,nPixels;
@@ -447,7 +448,7 @@ void OpticalFlow::SmoothFlowSOR(const DImage &Im1, const DImage &Im2, DImage &wa
 			estGaussianMixture(Im1,warpIm2,GMPara);
 			break;
 		case Lap:
-			estLaplacianNoise(Im1,warpIm2,LapPara);
+			estLaplacianNoise(Im1,warpIm2,LapPara, verbose);
 		}
 	}
 
@@ -464,7 +465,8 @@ void OpticalFlow::SmoothFlowSOR(const DImage &Im1, const DImage &Im2, DImage &wa
 //
 //--------------------------------------------------------------------------------------------------------
 void OpticalFlow::SmoothFlowPDE(const DImage &Im1, const DImage &Im2, DImage &warpIm2, DImage &u, DImage &v,
-																    double alpha, int nOuterFPIterations, int nInnerFPIterations, int nCGIterations)
+																    double alpha, int nOuterFPIterations, int nInnerFPIterations, int nCGIterations,
+                                                    bool verbose)
 {
 	DImage mask,imdx,imdy,imdt;
 	int imWidth,imHeight,nChannels,nPixels;
@@ -755,7 +757,7 @@ void OpticalFlow::SmoothFlowPDE(const DImage &Im1, const DImage &Im2, DImage &wa
 			estGaussianMixture(Im1,warpIm2,GMPara);
 			break;
 		case Lap:
-			estLaplacianNoise(Im1,warpIm2,LapPara);
+			estLaplacianNoise(Im1,warpIm2,LapPara, verbose);
 		}
 
 	}// end of outer fixed point iteration
@@ -816,7 +818,7 @@ void OpticalFlow::estGaussianMixture(const DImage& Im1,const DImage& Im2,Gaussia
 	}
 }
 
-void OpticalFlow::estLaplacianNoise(const DImage& Im1,const DImage& Im2,Vector<double>& para)
+void OpticalFlow::estLaplacianNoise(const DImage& Im1,const DImage& Im2,Vector<double>& para, bool verbose)
 {
 	int nChannels = Im1.nchannels();
 	if(para.dim()!=nChannels)
@@ -843,8 +845,10 @@ void OpticalFlow::estLaplacianNoise(const DImage& Im1,const DImage& Im2,Vector<d
 	{
 		if(total[k]==0)
 		{
-			cout<<"All the pixels are invalid in estimation Laplacian noise!!!"<<endl;
-			cout<<"Something severely wrong happened!!!"<<endl;
+         if(verbose) {
+            cout<<"All the pixels are invalid in estimation Laplacian noise!!!"<<endl;
+            cout<<"Something severely wrong happened!!!"<<endl;
+         }
 			para[k] = 0.001;
 		}
 		else
@@ -1002,7 +1006,7 @@ void OpticalFlow::Coarse2FineFlow(DImage &vx, DImage &vy, DImage &warpI2,const D
 		//SmoothFlowPDE(Image1,Image2,WarpImage2,vx,vy,alpha*pow((1/ratio),k),nOuterFPIterations,nInnerFPIterations,nCGIterations,GMPara);
 
 		//SmoothFlowPDE(Image1,Image2,WarpImage2,vx,vy,alpha,nOuterFPIterations,nInnerFPIterations,nCGIterations);
-		SmoothFlowSOR(Image1,Image2,WarpImage2,vx,vy,alpha,nOuterFPIterations+k,nInnerFPIterations,nCGIterations+k*3);
+		SmoothFlowSOR(Image1,Image2,WarpImage2,vx,vy,alpha,nOuterFPIterations+k,nInnerFPIterations,nCGIterations+k*3, verbose);
 
 		//GMPara.display();
 		if(verbose)
@@ -1073,7 +1077,7 @@ void OpticalFlow::Coarse2FineFlowLevel(DImage &vx, DImage &vy, DImage &warpI2,co
 		//SmoothFlowPDE(GPyramid1.Image(k),GPyramid2.Image(k),warpI2,vx,vy,alpha,nOuterFPIterations,nInnerFPIterations,nCGIterations);
 		//SmoothFlowPDE(Image1,Image2,WarpImage2,vx,vy,alpha*pow((1/ratio),k),nOuterFPIterations,nInnerFPIterations,nCGIterations,GMPara);
 
-		SmoothFlowPDE(Image1,Image2,WarpImage2,vx,vy,alpha,nOuterFPIterations,nInnerFPIterations,nCGIterations);
+		SmoothFlowPDE(Image1,Image2,WarpImage2,vx,vy,alpha,nOuterFPIterations,nInnerFPIterations,nCGIterations, verbose);
 		//GMPara.display();
 		if(verbose)
 			cout<<endl;

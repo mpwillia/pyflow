@@ -34,13 +34,13 @@ public:
 	static void genInImageMask(DImage& mask,const DImage& vx,const DImage& vy,int interval = 0);
 	static void genInImageMask(DImage& mask,const DImage& flow,int interval =0 );
 	static void SmoothFlowPDE(const DImage& Im1,const DImage& Im2, DImage& warpIm2,DImage& vx,DImage& vy,
-														 double alpha,int nOuterFPIterations,int nInnerFPIterations,int nCGIterations);
+														 double alpha,int nOuterFPIterations,int nInnerFPIterations,int nCGIterations, bool verbose = false);
 
 	static void SmoothFlowSOR(const DImage& Im1,const DImage& Im2, DImage& warpIm2, DImage& vx, DImage& vy,
-														 double alpha,int nOuterFPIterations,int nInnerFPIterations,int nSORIterations);
+														 double alpha,int nOuterFPIterations,int nInnerFPIterations,int nSORIterations, bool verbose = false);
 
 	static void estGaussianMixture(const DImage& Im1,const DImage& Im2,GaussianMixture& para,double prior = 0.9);
-	static void estLaplacianNoise(const DImage& Im1,const DImage& Im2,Vector<double>& para);
+	static void estLaplacianNoise(const DImage& Im1,const DImage& Im2,Vector<double>& para, bool verbose = false);
 	static void Laplacian(DImage& output,const DImage& input,const DImage& weight);
 	static void testLaplacian(int dim=3);
 
