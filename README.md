@@ -1,3 +1,8 @@
+
+## mpwillia fork modification
+
+Added a `verbose` argument to the `coarse2fine_flow` function. Allows the user to enable/disable any stdout output from the function. It defaults to False.
+
 ## Python Dense Optical Flow
 
 **Python** wrapper for Ce Liu's [C++ implementation](https://people.csail.mit.edu/celiu/OpticalFlow/) of Coarse2Fine Optical Flow. This is **super fast and accurate** optical flow method based on Coarse2Fine warping method from Thomas Brox. This python wrapper has minimal dependencies, and it also eliminates the need for C++ OpenCV library. For real time performance, one can additionally resize the images to a smaller size.

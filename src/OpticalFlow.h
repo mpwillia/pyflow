@@ -46,10 +46,10 @@ public:
 
 	// function of coarse to fine optical flow
 	static void Coarse2FineFlow(DImage& vx,DImage& vy,DImage &warpI2,const DImage& Im1,const DImage& Im2,double alpha,double ratio,int minWidth,
-															int nOuterFPIterations,int nInnerFPIterations,int nCGIterations);
+															int nOuterFPIterations,int nInnerFPIterations,int nCGIterations, bool verbose);
 
 	static void Coarse2FineFlowLevel(DImage& vx,DImage& vy,DImage &warpI2,const DImage& Im1,const DImage& Im2,double alpha,double ratio,int nLevels,
-															int nOuterFPIterations,int nInnerFPIterations,int nCGIterations);
+															int nOuterFPIterations,int nInnerFPIterations,int nCGIterations, bool verbose);
 
 	// function to convert image to features
 	static void im2feature(DImage& imfeature,const DImage& im);
@@ -88,7 +88,7 @@ public:
 			vy.data()[i] = flow.data()[i*2+1];
 		}
 	}
-	static void ComputeOpticalFlow(const DImage& Im1,const DImage& Im2,DImage& flow)
+	static void ComputeOpticalFlow(const DImage& Im1,const DImage& Im2,DImage& flow,bool verbose = false)
 	{
 		if(!Im1.matchDimension(Im2))
 		{
@@ -106,7 +106,7 @@ public:
 		int nCGIterations=40;
 
 		DImage vx,vy,warpI2;
-		OpticalFlow::Coarse2FineFlow(vx,vy,warpI2,Im1,Im2,alpha,ratio,minWidth,nOuterFPIterations,nInnerFPIterations,nCGIterations);
+		OpticalFlow::Coarse2FineFlow(vx,vy,warpI2,Im1,Im2,alpha,ratio,minWidth,nOuterFPIterations,nInnerFPIterations,nCGIterations,verbose);
 		AssembleFlow(vx,vy,flow);
 	}
 };
