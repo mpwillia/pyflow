@@ -15,14 +15,15 @@ cdef extern from "src/Coarse2FineFlowWrapper.h":
                                   double alpha, double ratio, int minWidth,
                                   int nOuterFPIterations, int nInnerFPIterations,
                                   int nSORIterations, int colType,
-                                  int h, int w, int c, bool verbose);
+                                  int h, int w, int c, bool verbose, double threshold);
 
 def coarse2fine_flow(np.ndarray[double, ndim=3, mode="c"] Im1 not None,
                         np.ndarray[double, ndim=3, mode="c"] Im2 not None,
                         double alpha=1, double ratio=0.5, int minWidth=40,
                         int nOuterFPIterations=3, int nInnerFPIterations=1,
                         int nSORIterations=20, int colType=0, 
-                        bool verbose = False):
+                        bool verbose = False,
+                        double threshold = 0.0):
     """
     Input Format:
       double * vx, double * vy, double * warpI2,
@@ -50,5 +51,6 @@ def coarse2fine_flow(np.ndarray[double, ndim=3, mode="c"] Im1 not None,
                             alpha, ratio, minWidth, nOuterFPIterations,
                             nInnerFPIterations, nSORIterations, colType,
                             h, w, c,
-                            verbose)
+                            verbose,
+                            threshold)
     return vx, vy, warpI2

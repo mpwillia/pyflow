@@ -15,7 +15,7 @@ void Coarse2FineFlowWrapper(double * vx, double * vy, double * warpI2,
                               int nOuterFPIterations, int nInnerFPIterations,
                               int nSORIterations, int colType,
                               int h, int w, int c,
-                              bool verbose) {
+                              bool verbose, double threshold) {
   DImage ImFormatted1, ImFormatted2;
   DImage vxFormatted, vyFormatted, warpI2Formatted;
 
@@ -33,7 +33,7 @@ void Coarse2FineFlowWrapper(double * vx, double * vy, double * warpI2,
                                 alpha, ratio, minWidth,
                                 nOuterFPIterations, nInnerFPIterations,
                                 nSORIterations,
-                                verbose);
+                                verbose, threshold);
 
   // copy formatted output to a contiguous memory to be returned
   memcpy(vx, vxFormatted.pData, h * w * sizeof(double));

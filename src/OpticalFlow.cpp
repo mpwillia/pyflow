@@ -5,6 +5,7 @@
 #include "ImageProcessing.h"
 #include "GaussianPyramid.h"
 #include <cstdlib>
+#include <cmath>
 #include <iostream>
 
 using namespace std;
@@ -195,7 +196,7 @@ void OpticalFlow::genInImageMask(DImage &mask, const DImage &flow,int interval)
 //--------------------------------------------------------------------------------------------------------
 void OpticalFlow::SmoothFlowSOR(const DImage &Im1, const DImage &Im2, DImage &warpIm2, DImage &u, DImage &v,
 																    double alpha, int nOuterFPIterations, int nInnerFPIterations, int nSORIterations,
-                                                    bool verbose)
+                                                    bool verbose, double threshold)
 {
 	DImage mask,imdx,imdy,imdt;
 	int imWidth,imHeight,nChannels,nPixels;
@@ -380,6 +381,8 @@ void OpticalFlow::SmoothFlowSOR(const DImage &Im1, const DImage &Im2, DImage &wa
 
 			du.reset();
 			dv.reset();
+         
+         bool use_converge_est = (threshold > 0.0);
 
 			for(int k = 0; k<nSORIterations; k++) {
             double total_du_change = 0;
@@ -423,36 +426,60 @@ void OpticalFlow::SmoothFlowSOR(const DImage &Im1, const DImage &Im2, DImage &wa
 						sigma1 *= -alpha;
 						sigma2 *= -alpha;
 						coeff *= alpha;
-						 // compute du
-						sigma1 += imdxy.data()[offset]*dv.data()[offset];
+                  
+                  if(use_converge_est) {
 
-                  double new_du = (1-omega)*du.data()[offset] + omega/(imdx2.data()[offset] + alpha*0.05 + coeff)*(imdtdx.data()[offset] - sigma1);
-                  double du_change = new_du - du.data()[offset];
-                  if(du_change < 0)
-                     du_change *= -1;
-                  total_du_change += du_change;
-						du.data()[offset] = new_du;
-						// compute dv
-						sigma2 += imdxy.data()[offset]*du.data()[offset];
+                      // compute du
+                     sigma1 += imdxy.data()[offset]*dv.data()[offset];
 
-                  double new_dv = (1-omega)*dv.data()[offset] + omega/(imdy2.data()[offset] + alpha*0.05 + coeff)*(imdtdy.data()[offset] - sigma2);
-                  double dv_change = new_dv - dv.data()[offset];
-                  if(dv_change < 0)
-                     dv_change *= -1;
-                  total_dv_change += dv_change;
-						dv.data()[offset] = new_dv;
+                     double new_du = (1-omega)*du.data()[offset] + omega/(imdx2.data()[offset] + alpha*0.05 + coeff)*(imdtdx.data()[offset] - sigma1);
+                     total_du_change += abs(new_du - du.data()[offset]);
 
+                     /*
+                     double du_change = new_du - du.data()[offset];
+                     if(du_change < 0)
+                        du_change *= -1;
+                     total_du_change += du_change;
+                     */
+
+                     du.data()[offset] = new_du;
+                     // compute dv
+                     sigma2 += imdxy.data()[offset]*du.data()[offset];
+
+                     double new_dv = (1-omega)*dv.data()[offset] + omega/(imdy2.data()[offset] + alpha*0.05 + coeff)*(imdtdy.data()[offset] - sigma2);
+                     total_dv_change += abs(new_dv - dv.data()[offset]);
+                     /*
+                     double dv_change = new_dv - dv.data()[offset];
+                     if(dv_change < 0)
+                        dv_change *= -1;
+                     total_dv_change += dv_change;
+                     */
+
+                     dv.data()[offset] = new_dv;
+                  } else {
+                      
+                      // compute du
+                     sigma1 += imdxy.data()[offset]*dv.data()[offset];
+                     du.data()[offset] = (1-omega)*du.data()[offset] + omega/(imdx2.data()[offset] + alpha*0.05 + coeff)*(imdtdx.data()[offset] - sigma1);
+
+                     // compute dv
+                     sigma2 += imdxy.data()[offset]*du.data()[offset];
+                     dv.data()[offset] = (1-omega)*dv.data()[offset] + omega/(imdy2.data()[offset] + alpha*0.05 + coeff)*(imdtdy.data()[offset] - sigma2);
+
+                  } 
 					}  //End of image width loop
             } // End of image height loop
             
-            // Compute the average change in the derivitives for each pixel
-            total_du_change /= imHeight * imWidth;
-            total_dv_change /= imHeight * imWidth;
-            
-            // Apply basic convergence thresholding
-            double threshold = 0.005;
-            if(total_du_change < threshold && total_dv_change < threshold) {
-               break;
+            if(use_converge_est) {
+               // Compute the average change in the derivitives for each pixel
+               total_du_change /= imHeight * imWidth;
+               total_dv_change /= imHeight * imWidth;
+               
+               // Apply basic convergence thresholding
+               if(total_du_change < threshold && total_dv_change < threshold) {
+                  //cout << "Breaking early" << endl;
+                  break;
+               }
             }
          } // End of SOR Iterations Loops
 		} // End of Inner FP Iterations Loop
@@ -973,7 +1000,7 @@ void OpticalFlow::testLaplacian(int dim)
 // function to perfomr coarse to fine optical flow estimation
 //--------------------------------------------------------------------------------------
 void OpticalFlow::Coarse2FineFlow(DImage &vx, DImage &vy, DImage &warpI2,const DImage &Im1, const DImage &Im2, double alpha, double ratio, int minWidth,
-																	 int nOuterFPIterations, int nInnerFPIterations, int nCGIterations, bool verbose)
+																	 int nOuterFPIterations, int nInnerFPIterations, int nCGIterations, bool verbose, double threshold)
 {
 	// first build the pyramid of the two images
 	GaussianPyramid GPyramid1;
@@ -1034,7 +1061,7 @@ void OpticalFlow::Coarse2FineFlow(DImage &vx, DImage &vy, DImage &warpI2,const D
 		//SmoothFlowPDE(Image1,Image2,WarpImage2,vx,vy,alpha*pow((1/ratio),k),nOuterFPIterations,nInnerFPIterations,nCGIterations,GMPara);
 
 		//SmoothFlowPDE(Image1,Image2,WarpImage2,vx,vy,alpha,nOuterFPIterations,nInnerFPIterations,nCGIterations);
-		SmoothFlowSOR(Image1,Image2,WarpImage2,vx,vy,alpha,nOuterFPIterations+k,nInnerFPIterations,nCGIterations+k*3, verbose);
+		SmoothFlowSOR(Image1,Image2,WarpImage2,vx,vy,alpha,nOuterFPIterations+k,nInnerFPIterations,nCGIterations+k*3, verbose, threshold);
 
 		//GMPara.display();
 		if(verbose)

@@ -37,7 +37,7 @@ public:
 														 double alpha,int nOuterFPIterations,int nInnerFPIterations,int nCGIterations, bool verbose = false);
 
 	static void SmoothFlowSOR(const DImage& Im1,const DImage& Im2, DImage& warpIm2, DImage& vx, DImage& vy,
-														 double alpha,int nOuterFPIterations,int nInnerFPIterations,int nSORIterations, bool verbose = false);
+														 double alpha,int nOuterFPIterations,int nInnerFPIterations,int nSORIterations, bool verbose = false, double threshold = 0.0);
 
 	static void estGaussianMixture(const DImage& Im1,const DImage& Im2,GaussianMixture& para,double prior = 0.9);
 	static void estLaplacianNoise(const DImage& Im1,const DImage& Im2,Vector<double>& para, bool verbose = false);
@@ -46,7 +46,7 @@ public:
 
 	// function of coarse to fine optical flow
 	static void Coarse2FineFlow(DImage& vx,DImage& vy,DImage &warpI2,const DImage& Im1,const DImage& Im2,double alpha,double ratio,int minWidth,
-															int nOuterFPIterations,int nInnerFPIterations,int nCGIterations, bool verbose);
+															int nOuterFPIterations,int nInnerFPIterations,int nCGIterations, bool verbose, double threshold = 0.0);
 
 	static void Coarse2FineFlowLevel(DImage& vx,DImage& vy,DImage &warpI2,const DImage& Im1,const DImage& Im2,double alpha,double ratio,int nLevels,
 															int nOuterFPIterations,int nInnerFPIterations,int nCGIterations, bool verbose);

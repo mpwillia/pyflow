@@ -11,4 +11,4 @@ extern void Coarse2FineFlowWrapper(double * vx, double * vy, double * warpI2,
                               int nOuterFPIterations, int nInnerFPIterations,
                               int nSORIterations, int colType,
                               int h, int w, int c,
-                              bool verbose);
+                              bool verbose, double threshold);
